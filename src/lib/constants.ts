@@ -7,8 +7,8 @@ import type { VoiceOption, NavItem } from '../types';
 /** Application name */
 export const APP_NAME = 'VoxAI';
 
-/** Maximum upload size for audio files: 25 MB */
-export const MAX_AUDIO_SIZE = 25 * 1024 * 1024;
+/** Maximum upload size for audio files: 10 MB */
+export const MAX_AUDIO_SIZE = 10 * 1024 * 1024;
 
 /** Maximum character count for TTS input */
 export const MAX_TTS_CHARS = 4096;

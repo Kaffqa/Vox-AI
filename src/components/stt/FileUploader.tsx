@@ -141,7 +141,7 @@ export default function FileUploader({ onFileSelect, disabled }: FileUploaderPro
                 Drop your audio file here
               </p>
               <p className="text-xs text-[--text-muted] mt-1">
-                or click to browse • MP3, WAV, M4A, WebM • Max 25MB
+                or click to browse • MP3, WAV, M4A, WebM • Max 10MB
               </p>
             </div>
           </>

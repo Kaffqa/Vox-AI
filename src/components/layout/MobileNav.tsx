@@ -7,10 +7,10 @@ import { LayoutDashboard, Mic, Volume2, History } from 'lucide-react';
 /* ────────────────────────────────────────────── */
 
 const mobileNavItems = [
-  { label: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
-  { label: 'STT', path: '/app/stt', icon: Mic },
-  { label: 'TTS', path: '/app/tts', icon: Volume2 },
-  { label: 'History', path: '/app/history', icon: History },
+  { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+  { label: 'STT', path: '/speech-to-text', icon: Mic },
+  { label: 'TTS', path: '/text-to-speech', icon: Volume2 },
+  { label: 'History', path: '/history', icon: History },
 ];
 
 /* ────────────────────────────────────────────── */

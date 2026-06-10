@@ -19,9 +19,9 @@ export default function History() {
     history.fetchHistory();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleDelete = useCallback(async (id: string, type: 'stt' | 'tts') => {
+  const handleDelete = useCallback(async (id: string, type: 'stt' | 'tts', url?: string) => {
     const success = type === 'stt'
-      ? await history.deleteSTTItem(id)
+      ? await history.deleteSTTItem(id, url)
       : await history.deleteTTSItem(id);
 
     if (success) {
@@ -241,7 +241,7 @@ export default function History() {
                           <Play className="w-3.5 h-3.5" />
                         </motion.button>
                         <motion.button
-                          onClick={() => handleDelete(item.id, item._type)}
+                          onClick={() => handleDelete(item.id, item._type, isSTT ? (item as STTHistory).audio_url : undefined)}
                           className="p-1.5 rounded-lg hover:bg-rose-500/10 text-[--text-secondary] hover:text-rose-400 transition-all"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}

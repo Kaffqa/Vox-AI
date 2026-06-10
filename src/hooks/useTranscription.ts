@@ -65,7 +65,7 @@ export function useTranscription(): TranscriptionReturn {
       // Upload audio to Supabase Storage
       const extension = audioBlob.type.includes('webm') ? 'webm' : 
                         audioBlob.type.includes('mp4') ? 'mp4' : 'wav';
-      const storagePath = `${user.id}/${Date.now()}.${extension}`;
+      const storagePath = `${user.id}/${crypto.randomUUID()}.${extension}`;
       
       const { error: uploadError } = await supabase.storage
         .from('audio-files')

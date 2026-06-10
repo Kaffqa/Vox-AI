@@ -11,7 +11,7 @@ interface HistoryState {
 
 interface HistoryReturn extends HistoryState {
   fetchHistory: (type?: HistoryType) => Promise<void>;
-  deleteSTTItem: (id: string) => Promise<boolean>;
+  deleteSTTItem: (id: string, audioUrl?: string) => Promise<boolean>;
   deleteTTSItem: (id: string) => Promise<boolean>;
   searchHistory: (query: string, type?: HistoryType) => void;
   filteredSTT: STTHistory[];
@@ -73,8 +73,22 @@ export function useHistory(): HistoryReturn {
     }
   }, [state.sttHistory, state.ttsHistory]);
 
-  const deleteSTTItem = useCallback(async (id: string): Promise<boolean> => {
+  const deleteSTTItem = useCallback(async (id: string, audioUrl?: string): Promise<boolean> => {
     try {
+      if (audioUrl) {
+        try {
+          const urlObj = new URL(audioUrl);
+          const pathParts = urlObj.pathname.split('/audio-files/');
+          if (pathParts.length > 1) {
+            const storagePath = decodeURIComponent(pathParts[1]);
+            const { error: storageError } = await supabase.storage.from('audio-files').remove([storagePath]);
+            if (storageError) console.error('Failed to delete storage file:', storageError);
+          }
+        } catch (e) {
+          console.error('Failed to parse or delete audio file:', e);
+        }
+      }
+
       const { error } = await supabase
         .from('stt_history')
         .delete()
