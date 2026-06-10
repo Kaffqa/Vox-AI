@@ -29,7 +29,7 @@ export function useTextToSpeech() {
   // Keep a reference to prevent garbage collection bugs on Android Chrome
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  const generateSpeech = useCallback(async (text: string, voiceURI: string) => {
+  const generateSpeech = useCallback((text: string, voiceURI: string) => {
     try {
       setError(null);
       if (!text.trim()) throw new Error('Please enter some text');

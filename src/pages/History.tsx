@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Trash2, Play, FileText, Volume2, Clock, Filter, Mic, ChevronDown } from 'lucide-react';
 import { useHistory } from '../hooks/useHistory';
@@ -11,6 +11,7 @@ export default function History() {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const history = useHistory();
   const player = useAudioPlayer();
@@ -31,10 +32,20 @@ export default function History() {
     }
   }, [history]);
 
-  const handlePlay = useCallback((url: string, id: string, text?: string) => {
+  const handlePlay = useCallback((url: string, id: string, text?: string, voiceURI?: string) => {
     if (url === 'web-speech-api' && text) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
+      utteranceRef.current = utterance; // Prevent GC on Android
+      
+      if (voiceURI) {
+        const availableVoices = window.speechSynthesis.getVoices();
+        const selectedVoice = availableVoices.find(v => v.voiceURI === voiceURI);
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+        }
+      }
+      
       window.speechSynthesis.speak(utterance);
       return;
     }
@@ -232,7 +243,7 @@ export default function History() {
 
                       <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         <motion.button
-                          onClick={() => handlePlay(item.audio_url, item.id, text)}
+                          onClick={() => handlePlay(item.audio_url, item.id, text, !isSTT ? (item as TTSHistory).voice_model : undefined)}
                           className="p-1.5 rounded-lg hover:bg-white/10 text-[--text-secondary] hover:text-cyan-400 transition-all"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}

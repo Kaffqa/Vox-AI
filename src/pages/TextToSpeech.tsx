@@ -21,13 +21,13 @@ export default function TextToSpeech() {
     }
   }, [tts.voices, selectedVoiceURI]);
 
-  const handleGenerate = useCallback(async () => {
+  const handleGenerate = useCallback(() => {
     if (!text.trim()) {
       showError('Please enter some text');
       return;
     }
     setSaved(false);
-    const success = await tts.generateSpeech(text, selectedVoiceURI);
+    const success = tts.generateSpeech(text, selectedVoiceURI);
     if (!success && tts.error) {
       showError(tts.error);
     }
