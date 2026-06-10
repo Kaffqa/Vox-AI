@@ -35,16 +35,17 @@ export function useTextToSpeech() {
       if (!text.trim()) throw new Error('Please enter some text');
       
       // Workaround for Android/Chrome bug: 
-      // Only cancel if actually speaking/pending, to prevent synthesis-failed
+      // Only cancel if actually speaking/pending
       if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
         window.speechSynthesis.cancel();
       }
       
-      // Add a tiny delay to allow cancel() to fully process before speaking
-      await new Promise(resolve => setTimeout(resolve, 50));
+      // IMPORTANT: Do NOT use setTimeout or await here. 
+      // Mobile browsers (Android/iOS) require speak() to be called synchronously 
+      // within the user interaction event. Any delay will cause synthesis-failed.
       
       const utterance = new SpeechSynthesisUtterance(text);
-      utteranceRef.current = utterance; // Prevent GC
+      utteranceRef.current = utterance; // Prevent GC on Android
       
       const selectedVoice = voices.find(v => v.voiceURI === voiceURI);
       if (selectedVoice) {

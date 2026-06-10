@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Mic, Volume2, History } from 'lucide-react';
+import { LayoutDashboard, Mic, Volume2, History, LogOut } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 /* ────────────────────────────────────────────── */
 /*  Mobile nav items                              */
@@ -18,6 +19,8 @@ const mobileNavItems = [
 /* ────────────────────────────────────────────── */
 
 const MobileNav = () => {
+  const { signOut } = useAuth();
+
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
@@ -27,7 +30,7 @@ const MobileNav = () => {
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}
     >
-      <div className="flex items-center justify-around px-2 py-2">
+      <div className="flex items-center justify-between px-4 py-2">
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
 
@@ -35,7 +38,7 @@ const MobileNav = () => {
             <NavLink
               key={item.path}
               to={item.path}
-              className="relative flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-colors"
+              className="relative flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition-colors"
             >
               {({ isActive }) => (
                 <>
@@ -70,6 +73,17 @@ const MobileNav = () => {
             </NavLink>
           );
         })}
+
+        {/* Log Out Button for Mobile */}
+        <button
+          onClick={() => signOut()}
+          className="relative flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition-colors text-slate-500 hover:text-rose-400"
+        >
+          <LogOut className="w-5 h-5 transition-colors" />
+          <span className="text-[10px] font-medium transition-colors">
+            Log Out
+          </span>
+        </button>
       </div>
     </nav>
   );
