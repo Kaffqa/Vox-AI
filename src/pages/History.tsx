@@ -230,7 +230,7 @@ export default function History() {
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         <motion.button
                           onClick={() => handlePlay(item.audio_url, item.id, text)}
                           className="p-1.5 rounded-lg hover:bg-white/10 text-[--text-secondary] hover:text-cyan-400 transition-all"
