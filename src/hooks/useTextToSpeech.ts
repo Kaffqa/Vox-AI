@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import type { TTSHistory } from '../types';
 
@@ -26,14 +26,26 @@ export function useTextToSpeech() {
     }
   }, []);
 
+  // Keep a reference to prevent garbage collection bugs on Android Chrome
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
   const generateSpeech = useCallback(async (text: string, voiceURI: string) => {
     try {
       setError(null);
       if (!text.trim()) throw new Error('Please enter some text');
       
-      window.speechSynthesis.cancel(); // Stop any current speech
+      // Workaround for Android/Chrome bug: 
+      // Only cancel if actually speaking/pending, to prevent synthesis-failed
+      if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+        window.speechSynthesis.cancel();
+      }
+      
+      // Add a tiny delay to allow cancel() to fully process before speaking
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       const utterance = new SpeechSynthesisUtterance(text);
+      utteranceRef.current = utterance; // Prevent GC
+      
       const selectedVoice = voices.find(v => v.voiceURI === voiceURI);
       if (selectedVoice) {
         utterance.voice = selectedVoice;
@@ -43,7 +55,10 @@ export function useTextToSpeech() {
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = (e) => {
         setIsSpeaking(false);
-        setError('Speech generation failed: ' + e.error);
+        // "interrupted" is normal if we cancel, but "synthesis-failed" is a bug
+        if (e.error !== 'interrupted') {
+          setError('Speech generation failed: ' + e.error);
+        }
       };
       
       window.speechSynthesis.speak(utterance);
