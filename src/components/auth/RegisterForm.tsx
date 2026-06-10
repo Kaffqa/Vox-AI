@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, Loader2, ArrowRight, CheckCircle } from 'lucide-react';
+import { Mail, Lock, User, Loader2, ArrowRight, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface RegisterFormProps {
@@ -25,6 +25,7 @@ const RegisterForm = ({ onToggle }: RegisterFormProps) => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -161,16 +162,23 @@ const RegisterForm = ({ onToggle }: RegisterFormProps) => {
           style={{ color: '#64748b' }}
         />
         <input
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           placeholder="Password (min. 6 characters)"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="new-password"
-          className="w-full pl-11 pr-4 py-3.5 rounded-xl text-sm outline-none placeholder:text-[#64748b] transition-colors"
+          className="w-full pl-11 pr-11 py-3.5 rounded-xl text-sm outline-none placeholder:text-[#64748b] transition-colors"
           style={inputStyle}
           onFocus={handleFocus}
           onBlur={handleBlur}
         />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-[#64748b] hover:text-[#f1f5f9] transition-colors focus:outline-none"
+        >
+          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
       </motion.div>
 
       {/* ── Submit ──────────────────────────────── */}

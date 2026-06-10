@@ -37,37 +37,28 @@ export default function TranscriptionEditor({ text, isLoading, onTextChange }: T
   if (isLoading) {
     return (
       <motion.div
-        className="rounded-2xl p-6 space-y-4"
-        style={{
-          background: 'rgba(255,255,255,0.03)',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255,255,255,0.08)',
-        }}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        className="w-full h-full p-8 flex flex-col justify-center space-y-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
       >
-        <div className="flex items-center gap-3">
-          <div className="w-5 h-5 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
-          <span className="text-sm text-cyan-400 font-medium">AI is transcribing your audio...</span>
-        </div>
-        <div className="space-y-3">
-          {[...Array(4)].map((_, i) => (
+        <div className="space-y-4 max-w-2xl mx-auto w-full">
+          {[...Array(5)].map((_, i) => (
             <motion.div
               key={i}
-              className="h-4 rounded-lg"
+              className="h-3 rounded-full"
               style={{
-                background: 'linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 100%)',
+                background: 'linear-gradient(90deg, rgba(6,182,212,0.1) 0%, rgba(139,92,246,0.3) 50%, rgba(6,182,212,0.1) 100%)',
                 backgroundSize: '200% 100%',
-                width: `${85 - i * 15}%`,
+                width: `${90 - i * 12}%`,
               }}
               animate={{
                 backgroundPosition: ['200% 0', '-200% 0'],
               }}
               transition={{
-                duration: 1.5,
+                duration: 2,
                 repeat: Infinity,
                 ease: 'linear',
-                delay: i * 0.1,
+                delay: i * 0.15,
               }}
             />
           ))}
@@ -77,48 +68,18 @@ export default function TranscriptionEditor({ text, isLoading, onTextChange }: T
   }
 
   if (!text) {
-    return (
-      <motion.div
-        className="rounded-2xl overflow-hidden h-full flex flex-col"
-        style={{
-          background: 'rgba(255,255,255,0.03)',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255,255,255,0.08)',
-        }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 shrink-0">
-          <h3 className="text-sm font-semibold text-[--text-primary]">Transcription Result</h3>
-        </div>
-        
-        {/* Empty State Content */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-3 p-8 min-h-[300px]">
-          <Type className="w-8 h-8 text-[--text-muted]" />
-          <p className="text-[--text-muted] text-sm text-center">
-            Transcription will appear here after recording or uploading audio
-          </p>
-        </div>
-      </motion.div>
-    );
+    return null; // Handled by parent now
   }
 
   return (
     <motion.div
-      className="rounded-2xl overflow-hidden h-full flex flex-col"
-      style={{
-        background: 'rgba(255,255,255,0.03)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255,255,255,0.08)',
-      }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      className="h-full flex flex-col"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
-      {/* Header with actions */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 shrink-0">
-        <h3 className="text-sm font-semibold text-[--text-primary]">Transcription Result</h3>
+      {/* Actions toolbar */}
+      <div className="flex items-center justify-end px-4 py-2 bg-black/10">
         <div className="flex items-center gap-2">
           <motion.button
             onClick={handleCopy}
@@ -144,25 +105,25 @@ export default function TranscriptionEditor({ text, isLoading, onTextChange }: T
       </div>
 
       {/* Editable text area */}
-      <div className="p-4 flex-1 flex flex-col min-h-0">
+      <div className="p-6 md:p-8 flex-1 flex flex-col min-h-[300px]">
         <textarea
           value={text}
           onChange={(e) => onTextChange(e.target.value)}
-          className="w-full flex-1 bg-transparent text-[--text-primary] text-sm leading-relaxed
-            font-mono resize-none outline-none placeholder:text-[--text-muted]"
-          style={{ fontFamily: "'JetBrains Mono', monospace" }}
+          className="w-full flex-1 bg-transparent text-slate-200 text-base md:text-lg leading-relaxed
+            resize-none outline-none placeholder:text-[--text-muted]"
+          style={{ fontFamily: "Inter, sans-serif" }}
           placeholder="No transcription yet..."
         />
       </div>
 
       {/* Footer with stats */}
-      <div className="flex items-center gap-4 px-4 py-2.5 border-t border-white/5">
-        <div className="flex items-center gap-1.5 text-xs text-[--text-muted]">
-          <Hash className="w-3 h-3" />
+      <div className="flex items-center justify-end gap-4 px-6 py-3 border-t border-white/5 bg-black/20">
+        <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+          <Hash className="w-3.5 h-3.5 text-cyan-500" />
           {wordCount} words
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-[--text-muted]">
-          <Type className="w-3 h-3" />
+        <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+          <Type className="w-3.5 h-3.5 text-violet-500" />
           {charCount} characters
         </div>
       </div>

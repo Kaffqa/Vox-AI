@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Upload, Save, RotateCcw } from 'lucide-react';
+import { Mic, Upload, Save, RotateCcw, Type } from 'lucide-react';
 import MicrophoneButton from '../components/stt/MicrophoneButton';
 import AudioWaveform from '../components/stt/AudioWaveform';
 import FileUploader from '../components/stt/FileUploader';
@@ -15,6 +15,7 @@ export default function SpeechToText() {
   const [mode, setMode] = useState<InputMode>('record');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [saved, setSaved] = useState(false);
+  const editorRef = useRef<HTMLDivElement>(null);
 
   const recorder = useAudioRecorder();
   const transcription = useTranscription();
@@ -81,99 +82,120 @@ export default function SpeechToText() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Scroll to editor when transcription starts appearing
+  useEffect(() => {
+    if (transcription.transcription && editorRef.current) {
+      editorRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [transcription.transcription]);
+
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-8 pb-12 relative overflow-hidden md:overflow-visible">
+      {/* Background glow specific to this page */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] max-w-[800px] h-[400px] pointer-events-none opacity-20" style={{ background: 'radial-gradient(ellipse, #06b6d4 0%, transparent 60%)', filter: 'blur(80px)', mixBlendMode: 'screen' }} />
+
       {/* Page header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-1"
+        className="text-center space-y-3 relative z-10 pt-4"
       >
-        <h1 className="text-2xl md:text-3xl font-bold text-[--text-primary]">
+        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-violet-500">
           Speech to Text
         </h1>
-        <p className="text-sm text-[--text-secondary]">
-          Record your voice or upload an audio file for AI-powered transcription
+        <p className="text-sm md:text-base text-[--text-secondary] max-w-lg mx-auto">
+          Experience seamless, AI-powered transcription. Speak naturally or upload an audio file to see it transform into text instantly.
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-        {/* Left: Input controls */}
-        <motion.div
-          className="rounded-2xl overflow-hidden h-full flex flex-col"
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.08)',
-          }}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
-          {/* Header with Mode Toggle */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 shrink-0">
-            <h3 className="text-sm font-semibold text-[--text-primary]">Audio Input</h3>
-            <div
-              className="inline-flex rounded-lg p-0.5"
-              style={{ background: 'rgba(255,255,255,0.05)' }}
-            >
-              <button
-                onClick={() => setMode('record')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-300
-                  ${mode === 'record'
-                    ? 'bg-gradient-to-r from-cyan-500/20 to-violet-500/20 text-white border border-cyan-500/30 shadow-sm'
-                    : 'text-[--text-secondary] hover:text-[--text-primary] border border-transparent'
-                  }`}
-              >
-                <Mic className="w-3.5 h-3.5" /> Record
-              </button>
-              <button
-                onClick={() => setMode('upload')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-300
-                  ${mode === 'upload'
-                    ? 'bg-gradient-to-r from-cyan-500/20 to-violet-500/20 text-white border border-cyan-500/30 shadow-sm'
-                    : 'text-[--text-secondary] hover:text-[--text-primary] border border-transparent'
-                  }`}
-              >
-                <Upload className="w-3.5 h-3.5" /> Upload
-              </button>
-            </div>
-          </div>
+      {/* Input Section - Centralized */}
+      <motion.div
+        className="relative rounded-[2rem] p-6 md:p-10 flex flex-col items-center justify-center overflow-hidden border z-10"
+        style={{
+          background: 'rgba(255, 255, 255, 0.02)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderColor: 'rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+        }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+      >
+        {/* Toggle Switch */}
+        <div className="flex p-1 mb-8 rounded-full" style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <button
+            onClick={() => setMode('record')}
+            className={`relative flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${mode === 'record' ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            {mode === 'record' && (
+              <motion.div
+                layoutId="mode-indicator"
+                className="absolute inset-0 rounded-full"
+                style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(139,92,246,0.2))', border: '1px solid rgba(255,255,255,0.1)' }}
+                transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <Mic className="w-4 h-4 relative z-10" />
+            <span className="relative z-10">Record</span>
+          </button>
+          <button
+            onClick={() => setMode('upload')}
+            className={`relative flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${mode === 'upload' ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            {mode === 'upload' && (
+              <motion.div
+                layoutId="mode-indicator"
+                className="absolute inset-0 rounded-full"
+                style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(139,92,246,0.2))', border: '1px solid rgba(255,255,255,0.1)' }}
+                transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <Upload className="w-4 h-4 relative z-10" />
+            <span className="relative z-10">Upload File</span>
+          </button>
+        </div>
 
-          {/* Input area */}
-          <div className="flex-1 p-6 md:p-8 flex flex-col items-center justify-center min-h-0">
-            <AnimatePresence mode="wait">
-              {mode === 'record' ? (
-                <motion.div
-                  key="record"
-                  className="flex flex-col items-center gap-6"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {/* Duration display */}
-                  {(recorder.isRecording || recorder.duration > 0) && (
+        {/* Input Area */}
+        <div className="w-full flex justify-center min-h-[220px]">
+          <AnimatePresence mode="wait">
+            {mode === 'record' ? (
+              <motion.div
+                key="record"
+                className="flex flex-col items-center gap-6 w-full max-w-md"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Duration Display */}
+                <div className="h-10 flex items-center justify-center">
+                  {(recorder.isRecording || recorder.duration > 0) ? (
                     <motion.div
-                      className="text-3xl font-mono font-bold"
+                      className="text-4xl font-mono font-bold tracking-wider"
                       style={{
                         background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                       }}
-                      initial={{ opacity: 0, scale: 0.8 }}
+                      initial={{ opacity: 0, scale: 0.5 }}
                       animate={{ opacity: 1, scale: 1 }}
                     >
                       {formatDuration(recorder.duration)}
                     </motion.div>
+                  ) : (
+                    <p className="text-slate-500 font-medium">Ready to record</p>
                   )}
+                </div>
 
-                  {/* Waveform */}
-                  <AudioWaveform
-                    audioLevel={recorder.audioLevel}
-                    isActive={recorder.isRecording}
-                  />
-
-                  {/* Microphone button */}
-                  <div className="py-4">
+                {/* Microphone Button & Waveform wrapper */}
+                <div className="relative flex flex-col items-center justify-center py-4 w-full">
+                  {/* Floating Waveform */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-50">
+                    <AudioWaveform audioLevel={recorder.audioLevel} isActive={recorder.isRecording} />
+                  </div>
+                  
+                  <div className="relative z-10">
                     <MicrophoneButton
                       isRecording={recorder.isRecording}
                       isProcessing={transcription.isTranscribing}
@@ -181,98 +203,136 @@ export default function SpeechToText() {
                       onClick={handleToggleRecording}
                     />
                   </div>
+                </div>
 
-                  {/* Error */}
-                  {recorder.error && (
-                    <motion.p
-                      className="text-xs text-rose-400 text-center"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
-                      {recorder.error}
-                    </motion.p>
-                  )}
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="upload"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <FileUploader
-                    onFileSelect={handleFileSelect}
-                    disabled={transcription.isTranscribing}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+                {/* Error Display */}
+                {recorder.error && (
+                  <motion.p className="text-sm text-rose-400 font-medium bg-rose-500/10 px-4 py-2 rounded-lg" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    {recorder.error}
+                  </motion.p>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="upload"
+                className="w-full max-w-lg flex items-center justify-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <FileUploader
+                  onFileSelect={handleFileSelect}
+                  disabled={transcription.isTranscribing}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
+
+      {/* Transcription Result Area */}
+      <motion.div
+        ref={editorRef}
+        className="w-full relative z-10"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        <div 
+          className="rounded-[2rem] overflow-hidden border flex flex-col transition-all duration-500"
+          style={{
+            background: 'rgba(6, 7, 10, 0.6)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderColor: 'rgba(255, 255, 255, 0.05)',
+            boxShadow: '0 20px 40px -10px rgba(0,0,0,0.5)',
+            minHeight: (transcription.transcription || transcription.isTranscribing) ? '400px' : '200px'
+          }}
+        >
+          {/* Header */}
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+            <div className="p-2 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.1), rgba(139,92,246,0.1))' }}>
+              <Type className="w-5 h-5 text-cyan-400" />
+            </div>
+            <h3 className="font-semibold text-lg text-slate-200">Transcription Result</h3>
+            
+            {/* Status indicator */}
+            {transcription.isTranscribing && (
+              <div className="ml-auto flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20">
+                <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                <span className="text-xs font-medium text-cyan-400">Processing AI...</span>
+              </div>
+            )}
           </div>
 
-          {/* Footer with Action buttons */}
-          {transcription.transcription && (
-            <div className="px-4 py-3 border-t border-white/5 shrink-0">
-              <motion.div
-                className="flex gap-3"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+          {/* Editor Area */}
+          <div className="flex-1 p-0 relative">
+            {(!transcription.transcription && !transcription.isTranscribing && !transcription.error) ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 opacity-60">
+                <Type className="w-12 h-12 mb-4 opacity-20" />
+                <p>Your transcription will appear here</p>
+              </div>
+            ) : (
+              <TranscriptionEditor
+                text={transcription.transcription}
+                isLoading={transcription.isTranscribing}
+                onTextChange={transcription.setTranscription}
+              />
+            )}
+            
+            {/* Error Display */}
+            {transcription.error && (
+              <div className="absolute bottom-4 left-4 right-4">
+                <motion.div
+                  className="text-sm text-rose-400 font-medium bg-rose-500/10 border border-rose-500/20 px-4 py-3 rounded-xl shadow-lg backdrop-blur-md"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  {transcription.error}
+                </motion.div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer Actions */}
+          <AnimatePresence>
+            {(transcription.transcription || saved) && (
+              <motion.div 
+                className="px-6 py-4 border-t border-white/5 bg-white/[0.02] flex items-center justify-between gap-4"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
               >
                 <motion.button
-                  onClick={handleSave}
-                  disabled={saved}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-medium
-                    transition-all ${saved
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-gradient-to-r from-cyan-500/20 to-violet-500/20 text-white border border-cyan-500/30 hover:from-cyan-500/30 hover:to-violet-500/30'
-                    }`}
-                  whileHover={!saved ? { scale: 1.02 } : {}}
-                  whileTap={!saved ? { scale: 0.98 } : {}}
-                >
-                  <Save className="w-4 h-4" />
-                  {saved ? 'Saved!' : 'Save to History'}
-                </motion.button>
-                <motion.button
                   onClick={handleReset}
-                  className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
-                    bg-white/5 text-[--text-secondary] hover:text-[--text-primary] hover:bg-white/10 border border-white/5 transition-all"
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border border-white/5 transition-all"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <RotateCcw className="w-4 h-4" />
                   Reset
                 </motion.button>
+                
+                <motion.button
+                  onClick={handleSave}
+                  disabled={saved}
+                  className={`flex items-center justify-center gap-2 px-8 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg ${
+                    saved
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-emerald-500/10'
+                      : 'bg-gradient-to-r from-cyan-500 to-violet-500 text-white shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-105'
+                  }`}
+                  whileHover={!saved ? { scale: 1.05 } : {}}
+                  whileTap={!saved ? { scale: 0.95 } : {}}
+                >
+                  <Save className="w-4 h-4" />
+                  {saved ? 'Saved to History' : 'Save to History'}
+                </motion.button>
               </motion.div>
-            </div>
-          )}
-        </motion.div>
-
-        {/* Right: Transcription result */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-          className="h-full flex flex-col"
-        >
-          <div className="flex-1 h-full min-h-0">
-            <TranscriptionEditor
-              text={transcription.transcription}
-              isLoading={transcription.isTranscribing}
-              onTextChange={transcription.setTranscription}
-            />
-          </div>
-
-          {transcription.error && (
-            <motion.div
-              className="mt-3 text-xs text-rose-400 bg-rose-500/10 px-4 py-2.5 rounded-xl"
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              {transcription.error}
-            </motion.div>
-          )}
-        </motion.div>
-      </div>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
     </div>
   );
 }
