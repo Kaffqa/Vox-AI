@@ -28,7 +28,7 @@ const features = [
   {
     icon: Shield,
     title: 'Secure & Private',
-    description: 'End-to-end encryption',
+    description: 'Secure cloud storage',
     color: '#10b981',
   },
 ];

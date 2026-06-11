@@ -174,9 +174,9 @@ export default function Dashboard() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
-            { icon: Zap, title: 'High Accuracy', desc: 'OpenAI Whisper for precise transcription', color: '#22d3ee' },
-            { icon: Volume2, title: 'Multiple Voices', desc: '6 AI voices to choose from', color: '#a78bfa' },
-            { icon: Shield, title: 'Secure & Private', desc: 'Your data is encrypted and protected', color: '#34d399' },
+            { icon: Zap, title: 'High Accuracy', desc: 'State-of-the-art AI transcription from Grok', color: '#22d3ee' },
+            { icon: Volume2, title: 'Multiple Voices', desc: 'Dozens of natural browser voices', color: '#a78bfa' },
+            { icon: Shield, title: 'Secure & Private', desc: 'Your data is securely stored and protected', color: '#34d399' },
           ].map((feature) => (
             <div
               key={feature.title}
