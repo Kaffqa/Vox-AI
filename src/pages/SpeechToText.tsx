@@ -9,7 +9,7 @@ import { useAudioRecorder } from "../hooks/useAudioRecorder";
 import { useTranscription } from "../hooks/useTranscription";
 import { showSuccess, showError } from "../components/ui/Toast";
 import AIChatPanel from "../components/stt/AIChatPanel";
-import { Sparkles } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 
 type InputMode = "record" | "upload";
 
@@ -376,13 +376,17 @@ export default function SpeechToText() {
                   </motion.button>
 
                   <motion.button
-                    onClick={() => setIsChatOpen(true)}
-                    className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all"
+                    onClick={() => setIsChatOpen(!isChatOpen)}
+                    className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      isChatOpen
+                        ? "bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20"
+                        : "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20"
+                    }`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <Sparkles className="w-4 h-4" />
-                    Ask AI
+                    {isChatOpen ? <X className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                    {isChatOpen ? "Close AI" : "Ask AI"}
                   </motion.button>
                 </div>
 
